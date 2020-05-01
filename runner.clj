@@ -6,12 +6,17 @@
 
 (ns runner
   (:require [clojure.java.shell :as shell]
+            [clojure.java.io :refer [make-parents]]
+            [clojure.string :refer [replace split join lower-case]]
             [clojure.tools.cli :refer [parse-opts]]))
 
-(defn camelcase-to-delimitered [k delimeter]
-  (->> (clojure.string/split k #"(?=[A-Z])")
-       (map clojure.string/lower-case)
-       (clojure.string/join delimeter)))
+(defn camelcase-to-delimitered
+  "Transform CamelCase project name to delimitered.
+   e.g (camelcase-to-delimitered AwesomeProject _) will produce awesome_project"
+  [k delimeter]
+  (->> (split k #"(?=[A-Z])")
+       (map lower-case)
+       (join delimeter)))
 
 (def documentation
   "https://github.com/vouch-opensource/krell/wiki/Reagent-Tutorial#using-the-repl")
@@ -28,8 +33,7 @@
        (do (println "ERROR:" err)
          (System/exit 1)))))
   ([shell-command fn-error]
-   (let [{:keys [exit err out]} shell-command]
-     (println exit)
+   (let [{:keys [exit out]} shell-command]
      (if (zero? exit)
        out
        (fn-error shell-command))))
@@ -39,31 +43,33 @@
        (fn-success shell-command)
        (fn-error shell-command)))))
 
-(defn gen-rn-project [{:keys [arguments]}]
+(defn gen-rn-project
   "Generate react-native project using [npx react-native init ProjectName]"
+  [{:keys [arguments]}]
   (let [project-name (first arguments)]
     (println (str "🛠 Building React Native " project-name " project"))
     (println (str "ℹ️ (This may take a while. You know npm better than me)\n"))
     (run-shell (shell/sh "npx" "react-native" "init" project-name))))
 
-(defn install-rn-deps [project-name]
-  "npm install"
+(defn install-rn-deps
+  "Run npm install"
+  [project-name]
   (println (str "🛠 Installing Node dependencies"))
   (run-shell (shell/sh "npm" "install" :dir project-name)))
 
 (defn make-edns [project-name]
   (println "🛠 Initializing dependency files")
-  (spit (str project-name "/deps.edn") (slurp "deps-template.edn"))
+  (spit (str project-name "/deps.edn") (slurp "templates/deps-template"))
   (spit (str project-name "/build.edn")
-        (clojure.string/replace
-         (slurp "build-template.edn") #"\$TEMPLATE\$" (str (camelcase-to-delimitered project-name "_") ".core"))))
+        (replace (slurp "templates/build-template") #"\$TEMPLATE\$" (str (camelcase-to-delimitered project-name "_") ".core"))))
 
 (defn install-deps [project-name]
   (println "🛠 Installing Clojure dependencies")
   (run-shell (shell/sh "clj" "-m" "cljs.main" "--install-deps" :dir project-name)))
 
-(defn run-pod-install [project-name]
-  "pod install"
+(defn run-pod-install
+  "Run pod install"
+  [project-name]
   (run-shell (shell/sh "which" "pod")
              (fn [_]
                (println "🛠 Running pod install")
@@ -74,10 +80,10 @@
 
 (defn write-clojure-file [project-name]
   (let [file-name        (str project-name "/src/" (camelcase-to-delimitered project-name "_") "/core.cljs")
-        content          (slurp "core-template.cljs")
-        adjusted-content (clojure.string/replace content #"\$TEMPLATE\$" (str (camelcase-to-delimitered project-name "-") ".core"))]
+        content          (slurp "templates/core-template")
+        adjusted-content (replace content #"\$TEMPLATE\$" (str (camelcase-to-delimitered project-name "-") ".core"))]
     (println "🛠 Preparing ClojureScript files")
-    (clojure.java.io/make-parents file-name)
+    (make-parents file-name)
     (spit file-name adjusted-content)))
 
 (defn setup-clojure-env [project-name]
@@ -86,9 +92,9 @@
   (run-pod-install project-name)
   (write-clojure-file project-name))
 
-(defn gen-project [{:keys [options arguments summary] :as args}]
+(defn gen-project [{:keys [arguments summary] :as args}]
   (let [project-name           (first arguments)]
-    (if-let [is-project-name-valid? (re-find #"^\w+$" project-name)]
+    (if-let [_ (re-find #"^\w+$" project-name)]
       (do
         (gen-rn-project args)
         (install-rn-deps project-name)
@@ -121,7 +127,7 @@
         (System/exit 1)))))
 
 (let [{:keys [options arguments summary errors] :as args} (parse-opts *command-line-args* cli-options)]
-    (cond
-      errors          (println errors "\n" summary)
-      (:help options) (println summary)
-      arguments       (gen-project args)))
+  (cond
+    errors          (println errors "\n" summary)
+    (:help options) (println summary)
+    arguments       (gen-project args)))
