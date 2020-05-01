@@ -118,9 +118,8 @@
               summary))
         (System/exit 1)))))
 
-(defn -main []
-  (let [{:keys [options arguments summary errors] :as args} (parse-opts *command-line-args* cli-options)]
+(let [{:keys [options arguments summary errors] :as args} (parse-opts *command-line-args* cli-options)]
     (cond
       errors          (println errors "\n" summary)
       (:help options) (println summary)
-      arguments       (gen-project args))))
+      arguments       (gen-project args)))
