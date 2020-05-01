@@ -5,4 +5,5 @@ git clone https://github.com/ampersanda/krell-template-runner
 cd krell-template-runner
 bb runner.clj $1
 mv $1 ..
+cd ..
 rm -rf krell-template-runner
