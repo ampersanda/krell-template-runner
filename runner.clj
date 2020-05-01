@@ -1,4 +1,4 @@
-; #!/usr/bin/env bb
+#!/usr/bin/env bb
 
 ; NodeJS is required by react-native in this project
 ; clj is required
