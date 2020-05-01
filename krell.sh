@@ -10,7 +10,11 @@ if ! type bb > /dev/null; then
   echo "👉 Babashka installed."
 fi
 
-bb runner.clj $1
+all_args=("$@")
+first_arg=$1
+rest_args=("${all_args[@]:1}")
+
+bb runner.clj $1 "${rest_args[@]}"
 mv $1 ..
 cd ..
 rm -rf krell-template-runner

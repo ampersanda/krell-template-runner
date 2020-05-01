@@ -1,4 +1,4 @@
-#!/usr/bin/env bb
+;#!/usr/bin/env bb
 
 ; NodeJS is required by react-native in this project
 ; clj is required
@@ -22,8 +22,9 @@
   "https://github.com/vouch-opensource/krell/wiki/Reagent-Tutorial#using-the-repl")
 
 (def cli-options
-  [;["-v" "--version" "Define specific React Native version"]
-    ["-h" "--help" "Show help"]])
+  [["-p" "--package=PACKAGE_NAME" "Define organization package name e.g. --package=com.example.krell"]
+   ["-v" "--version=VERSION" "Define specific React Native version e.g. --version=1.0.0"]
+   ["-h" "--help" "Show help"]])
 
 (defn run-shell
   ([shell-command]
@@ -45,11 +46,12 @@
 
 (defn gen-rn-project
   "Generate react-native project using [npx react-native init ProjectName]"
-  [{:keys [arguments]}]
-  (let [project-name (first arguments)]
+  [{:keys [arguments options]}]
+  (let [project-name (first arguments)
+        sh-args      (flatten (into [] options))]
     (println (str "🛠 Building React Native " project-name " project"))
     (println (str "ℹ️ (This may take a while. You know npm better than me)\n"))
-    (run-shell (shell/sh "npx" "react-native" "init" project-name))))
+    (run-shell (apply shell/sh "npx" "react-native" "init" project-name (flatten (into [] options))))))
 
 (defn install-rn-deps
   "Run npm install"
@@ -92,7 +94,7 @@
   (run-pod-install project-name)
   (write-clojure-file project-name))
 
-(defn gen-project [{:keys [arguments summary] :as args}]
+(defn gen-project [{:keys [arguments summary options] :as args}]
   (let [project-name           (first arguments)]
     (if-let [_ (re-find #"^\w+$" project-name)]
       (do
