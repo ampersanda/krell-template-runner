@@ -17,8 +17,11 @@ rest_args=("${all_args[@]:1}")
 bb runner.clj "${first_arg}" "${rest_args[@]}"
 
 if [[ $# -eq 0 ]]; then
-  mv ${first_arg} ..
   cd ..
   rm -rf krell-template-runner
   exit 0
 fi
+
+mv ${first_arg} ..
+cd ..
+rm -rf krell-template-runner
