@@ -51,7 +51,7 @@
         sh-args      (flatten (into [] options))]
     (println (str "🛠 Building React Native " project-name " project"))
     (println (str "ℹ️ (This may take a while. You know npm better than me)\n"))
-    (run-shell (apply shell/sh "npx" "react-native" "init" project-name (flatten (into [] options))))))
+    (run-shell (apply shell/sh "npx" "react-native" "init" project-name sh-args))))
 
 (defn install-rn-deps
   "Run npm install"
@@ -94,7 +94,7 @@
   (run-pod-install project-name)
   (write-clojure-file project-name))
 
-(defn gen-project [{:keys [arguments summary options] :as args}]
+(defn gen-project [{:keys [arguments summary] :as args}]
   (let [project-name           (first arguments)]
     (if (re-find #"^\w+$" project-name)
       (do
