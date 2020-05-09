@@ -1,7 +1,7 @@
 #!/bin/bash
 
 rm -rf krell-template-runner
-git clone https://github.com/ampersanda/krell-template-runner
+git clone -b feat/handle-npe https://github.com/ampersanda/krell-template-runner
 cd krell-template-runner
 
 if ! type bb >/dev/null; then
@@ -11,10 +11,10 @@ if ! type bb >/dev/null; then
 fi
 
 all_args=("$@")
-first_arg=$1
+first_args=$1
 rest_args=("${all_args[@]:1}")
 
-bb runner.clj "${first_arg}" "${rest_args[@]}"
+bb runner.clj "${first_args}" "${rest_args[@]}"
 
 if [[ $# -eq 0 ]]; then
   cd ..
@@ -22,6 +22,6 @@ if [[ $# -eq 0 ]]; then
   exit 0
 fi
 
-mv ${first_arg} ..
+mv $1 ..
 cd ..
 rm -rf krell-template-runner
