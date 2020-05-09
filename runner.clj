@@ -96,7 +96,7 @@
 
 (defn gen-project [{:keys [arguments summary options] :as args}]
   (let [project-name           (first arguments)]
-    (if-let [_ (re-find #"^\w+$" project-name)]
+    (if (re-find #"^\w+$" project-name)
       (do
         (gen-rn-project args)
         (install-rn-deps project-name)
@@ -122,14 +122,15 @@
               "Read more: " documentation)))
       (do
         (println
-         (str "ERROR: Error creating \"" project-name "\" project. Consider using CamelCase name. e.g. AwesomeProject"
-              "\n"
-              "\n"
-              summary))
+         (str "ERROR: Error creating \"" project-name "\" project. Consider using CamelCase name. e.g. AwesomeProject\n\n" summary))
         (System/exit 1)))))
 
-(let [{:keys [options arguments summary errors] :as args} (parse-opts *command-line-args* cli-options)]
+(let [{:keys [options arguments summary errors] :as args} (parse-opts *command-line-args* cli-options)
+      is-args-empty?                                      (empty?
+                                                           ;; to avoid NPE in babashka, bash will pass empty string to arguments
+                                                           (filter #(not= % "") arguments))]
   (cond
+    is-args-empty?  (println (str "ERROR: Error creating project, missing project name.\n\n" summary))
     errors          (println errors "\n" summary)
     (:help options) (println summary)
     arguments       (gen-project args)))
