@@ -10,24 +10,24 @@ rm -rf krell-template-runner
 git clone https://github.com/ampersanda/krell-template-runner
 cd krell-template-runner
 
+cleanup() {
+  cd ..
+  rm -rf krell-template-runner
+}
+
 if ! command -v bb &>/dev/null; then
   info "Babashka is not installed. Installing babashka..."
   bash <(curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install)
   ok "Babashka installed."
 fi
 
-all_args=("$@")
-first_args=$1
-rest_args=("${all_args[@]:1}")
-
-bb runner.clj "${first_args}" "${rest_args[@]}"
-
 if [[ $# -eq 0 ]]; then
-  cd ..
-  rm -rf krell-template-runner
+  bb runner.clj
+  cleanup
   exit 0
 fi
 
+bb runner.clj "$@"
+
 mv "$1" ..
-cd ..
-rm -rf krell-template-runner
+cleanup

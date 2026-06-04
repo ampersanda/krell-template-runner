@@ -101,13 +101,13 @@
   (spit (str project-name "/deps.edn") (slurp "templates/deps-template"))
   (verbose "Writing build.edn")
   (spit (str project-name "/build.edn")
-        (replace (slurp "templates/build-template") #"\$TEMPLATE\$" (str (camelcase-to-delimitered project-name "_") ".core")))
+        (replace (slurp "templates/build-template") #"\$TEMPLATE\$" (str (camelcase-to-delimitered project-name "-") ".core")))
   (ok "Dependency files created"))
 
 (defn- install-deps [project-name]
   (info "Installing Clojure dependencies...")
-  (verbose "clj -m cljs.main --install-deps")
-  (run-shell (shell/sh "clj" "-m" "cljs.main" "--install-deps" :dir project-name))
+  (verbose "clj -M -m cljs.main --install-deps")
+  (run-shell (shell/sh "clj" "-M" "-m" "cljs.main" "--install-deps" :dir project-name))
   (ok "Clojure dependencies installed"))
 
 (defn- run-pod-install
@@ -152,7 +152,7 @@
         (println)
         (ok "Done!\n")
         (println (str "  $ cd " project-name))
-        (println "  $ clj -m krell.main -co build.edn -c -r")
+        (println "  $ clj -M -m krell.main -co build.edn -c -r")
         (println)
         (println "  Open new terminal tabs and run:")
         (println "  $ npx react-native start")
@@ -160,7 +160,7 @@
         (println "  For iOS:     $ npx react-native run-ios")
         (println "  For Android: $ npx react-native run-android")
         (println)
-        (println (str "  Production:  $ clj -m krell.main -v -co build.edn -O advanced -c"))
+        (println (str "  Production:  $ clj -M -m krell.main -v -co build.edn -O advanced -c"))
         (println)
         (println (str "  Read more: " documentation)))
       (fail (str "Invalid project name \"" project-name "\". Use CamelCase, e.g. AwesomeProject\n\n" summary)))))

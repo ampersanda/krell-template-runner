@@ -7,7 +7,7 @@ Scaffold a [Krell](https://github.com/vouch-opensource/krell) (ClojureScript + R
 - [Node.js](https://nodejs.org/)
 - [Clojure CLI](https://clojure.org/guides/install_clojure)
 - [Babashka](https://github.com/babashka/babashka#installation) (installed automatically if missing)
-- [CocoaPods](https://cocoapods.org/) (optional, for iOS)
+- [CocoaPods](https://cocoapods.org/) (required for iOS)
 
 ## Quick Start
 
@@ -44,7 +44,7 @@ curl -s https://raw.githubusercontent.com/ampersanda/krell-template-runner/maste
 
 ```sh
 cd AwesomeProject
-clj -m krell.main -co build.edn -c -r
+clj -M -m krell.main -co build.edn -c -r
 ```
 
 In separate terminal tabs:
@@ -64,7 +64,7 @@ npx react-native run-android
 Production build:
 
 ```sh
-clj -m krell.main -v -co build.edn -O advanced -c
+clj -M -m krell.main -v -co build.edn -O advanced -c
 ```
 
 ## Documentation
